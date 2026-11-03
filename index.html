@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SafeZone AI | Disaster Rescue Intelligence</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--blue:#1478bd;--blue2:#0c5e96;--bg:#f4f6f9;--card:#fff;--text:#17202a;--muted:#74808c;--line:#e1e7ed;--red:#d33b35;--orange:#e48b00;--yellow:#cba300;--green:#2d9749}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:14px Inter,Segoe UI,Arial;color:var(--text)}button,input{font:inherit}
+.top{height:70px;background:linear-gradient(100deg,var(--blue2),var(--blue));color:#fff;display:flex;align-items:center;padding:0 30px;gap:35px;position:sticky;top:0;z-index:1000;box-shadow:0 2px 12px #0002}.logo{font-size:21px;font-weight:800;white-space:nowrap}.logo small{display:block;font-size:9px;font-weight:500;opacity:.8}.nav{display:flex;gap:5px;flex:1}.nav button{border:0;background:transparent;color:#dceefa;padding:11px 15px;border-radius:8px;cursor:pointer}.nav button:hover,.nav button.active{background:#ffffff22;color:#fff;font-weight:700}.emergency{background:#d33b35!important;color:#fff!important;border:1px solid #ffffff55!important;font-weight:800!important}
+main{max-width:1500px;margin:auto;padding:25px}.page{display:none}.page.active{display:block}.hero{background:linear-gradient(110deg,#126da9,#2787c6);color:white;border-radius:17px;padding:30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 8px 25px #164b6d18}.hero h1{margin:0 0 8px;font-size:29px}.hero p{margin:0;opacity:.85}.heroScore{text-align:right}.heroScore b{font-size:40px;display:block}.section{margin:24px 0 13px;display:flex;justify-content:space-between;align-items:center}.section h2{font-size:18px;margin:0}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 5px 18px #2030400b}.risk{border-top:4px solid var(--c)}.risk b{font-size:29px;display:block;margin:9px 0 2px;color:var(--c)}.muted{color:var(--muted);font-size:12px}.badge{padding:5px 9px;border-radius:15px;font-size:10px;font-weight:800}.critical{color:var(--red);background:#fde9e7}.high{color:#a76500;background:#fff0d9}.moderate{color:#987800;background:#fff7d5}.low{color:#277b3c;background:#e8f6eb}.btn{border:0;border-radius:8px;padding:10px 14px;background:var(--blue);color:#fff;font-weight:700;cursor:pointer}.btn.green{background:var(--green)}.btn.red{background:var(--red)}.btn.light{background:#edf3f7;color:#345367}.row{display:flex;justify-content:space-between;align-items:center;gap:15px}.alert{border-left:5px solid var(--red)}.score{font-size:25px;font-weight:800}.score.red{color:var(--red)}.score.orange{color:var(--orange)}.score.yellow{color:var(--yellow)}.score.green{color:var(--green)}
+#map{height:650px;border-radius:15px;overflow:hidden;border:1px solid var(--line);box-shadow:0 6px 20px #0001}.mapTools{position:absolute;z-index:800;top:85px;left:40px;display:flex;gap:8px}.mapTools input{width:280px;padding:11px;border:1px solid var(--line);border-radius:8px;box-shadow:0 3px 12px #0002}.legend{position:absolute;z-index:800;bottom:25px;left:25px;background:#fff;padding:13px;border-radius:10px;box-shadow:0 3px 15px #0002}.legend div{margin:6px}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px}.leaflet-popup-content{min-width:220px}.popupScore{font-size:22px;font-weight:800;color:var(--red)}.popupBtn{margin-top:8px}
+.rank{display:flex;gap:13px;align-items:center}.rankNo{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:#edf1f4}.rankMain{flex:1}.bar{height:8px;background:#edf0f2;border-radius:8px;margin:12px 0}.bar i{height:100%;display:block;border-radius:8px}
+.siteScore{padding:13px;background:#eaf7ed;border-radius:9px;margin:12px 0}.siteScore strong{font-size:26px;color:var(--green)}.details{display:grid;grid-template-columns:1fr 1fr;gap:9px;color:var(--muted);font-size:12px}.details b{float:right;color:var(--text)}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.alertSummary{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.alertSummary .card{text-align:center}.alertSummary strong{font-size:30px;display:block}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px;border-bottom:1px solid var(--line);font-size:13px}th{font-size:11px;color:var(--muted);text-transform:uppercase}
+.modal{display:none;position:fixed;z-index:2000;inset:0;background:#07131dcc;place-items:center;padding:20px}.modal.show{display:grid}.modalBox{background:#fff;border-radius:16px;padding:24px;max-width:600px;width:100%;box-shadow:0 20px 70px #0005}.close{float:right;border:0;border-radius:50%;width:32px;height:32px;background:#edf1f4;cursor:pointer}.toast{display:none;position:fixed;right:20px;bottom:20px;background:#17202a;color:#fff;padding:13px 17px;border-radius:9px;z-index:3000}.toast.show{display:block}
+@media(max-width:850px){.top{padding:0 12px;gap:10px;flex-wrap:wrap;height:auto;min-height:70px}.nav{overflow-x:auto}.nav button{padding:9px}.grid4,.grid3,.grid2{grid-template-columns:1fr 1fr}.hero{display:block}.heroScore{text-align:left;margin-top:15px}.mapTools{left:20px;right:20px;top:95px}.mapTools input{width:100%}}
+@media(max-width:560px){main{padding:13px}.grid4,.grid3,.grid2,.alertSummary{grid-template-columns:1fr}.top{align-items:center}.nav{order:3;width:100%}.hero h1{font-size:23px}.details{grid-template-columns:1fr}.mapTools{top:112px}.mapTools .btn{display:none}}
+
+/* SafeZone AI v3 layout */
+body{background:#f4f6f9}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:245px;background:#fff;border-right:1px solid var(--line);z-index:1500;padding:22px 14px;box-shadow:3px 0 20px #16354a0a}
+.sideBrand{display:flex;align-items:center;gap:11px;padding:4px 10px 28px}
+.sideBrand b{display:block;font-size:18px}.sideBrand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.5px;margin-top:2px}
+.sideLogo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#208bd1,#0b5b93);color:#fff;display:grid;place-items:center;font-weight:900}
+.sideNav{display:grid;gap:7px}.sideNav button{width:100%;border:0;background:transparent;color:#52606d;padding:13px 14px;border-radius:11px;text-align:left;display:flex;align-items:center;gap:13px;font-weight:600;cursor:pointer}
+.sideNav button span{width:24px;text-align:center;font-size:18px}.sideNav button:hover,.sideNav button.active{background:#eaf4fb;color:var(--blue);font-weight:800}
+.sideStatus{position:absolute;left:18px;right:18px;bottom:22px;background:#edf8f0;border:1px solid #cfe9d5;color:#2b7d3e;border-radius:11px;padding:11px;font-size:11px}
+.sideStatus small{display:block;color:#6f7d75;margin-top:4px}
+.top{height:68px;background:#fff;border-bottom:1px solid var(--line);position:fixed;left:245px;right:0;top:0;z-index:1400;display:flex;align-items:center;justify-content:space-between;padding:0 28px}
+.topTitle{font-size:20px;font-weight:800}.topRight{display:flex;align-items:center;gap:12px}.live{background:#fff0ee;color:var(--red);font-size:11px;font-weight:800;padding:8px 12px;border-radius:18px}
+.main,.top+main{margin-left:245px;width:calc(100% - 245px)}
+main{padding-top:68px;max-width:none!important}
+.content{max-width:none!important}
+.mapPage{height:calc(100vh - 68px);padding:0!important;position:relative}
+.mapHeader{height:78px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:12px 24px;position:relative;z-index:4}
+.mapHeader h2{margin:0;font-size:21px}.mapHeader p{margin:3px 0 0;color:var(--muted);font-size:11px}
+.mapFilters{display:flex;gap:6px}.filter{border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:18px;font-size:11px;cursor:pointer}.filter.active{background:#eaf4fb;color:var(--blue);border-color:#bcdced;font-weight:800}
+.worldMapShell{height:calc(100% - 78px);position:relative;background:#dce8d8}
+#map{height:100%!important;width:100%;border:0!important;border-radius:0!important;box-shadow:none!important}
+.mapTools{position:absolute!important;z-index:800;top:15px!important;left:18px!important;display:flex;gap:8px;align-items:center}
+.mapTools input{width:280px!important;background:#fff;padding:11px 13px;border:1px solid #dfe5ea;border-radius:9px;box-shadow:0 3px 15px #0002}
+.mapLegend{position:absolute;z-index:800;bottom:20px;left:20px;background:#fff;padding:15px;border-radius:12px;box-shadow:0 5px 20px #0002;font-size:11px;min-width:190px}
+.mapLegend div{margin:8px 0}.mapLegend i{width:11px;height:11px;display:inline-block;border-radius:50%;margin-right:7px}.mapLegend hr{border:0;border-top:1px solid var(--line);margin:11px 0}
+.mapInfo{position:absolute;z-index:800;right:20px;bottom:20px;background:#fff;border-radius:12px;padding:13px 15px;box-shadow:0 5px 20px #0002;font-size:11px;display:grid;gap:5px}.mapInfo span{color:var(--muted)}
+.leaflet-control-zoom{margin-top:60px!important}
+
+@media(max-width:850px){
+ .sidebar{width:190px}.top{left:190px}.main,.top+main{margin-left:190px;width:calc(100% - 190px)}
+ .mapHeader{height:auto;min-height:105px;display:block;padding:12px 16px}.mapFilters{margin-top:10px;overflow:auto}.worldMapShell{height:calc(100% - 105px)}
+}
+@media(max-width:600px){
+ .sidebar{top:auto;bottom:0;width:100%;height:65px;padding:5px 7px;border-right:0;border-top:1px solid var(--line)}
+ .sideBrand,.sideStatus{display:none}.sideNav{display:flex;justify-content:space-around;gap:2px;height:100%}.sideNav button{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1px;padding:4px;font-size:9px}.sideNav button span{font-size:16px}
+ .top{left:0;height:60px;padding:0 12px}.topTitle{font-size:17px}.topRight .live{display:none}.topRight .emergency{padding:8px;font-size:10px}
+ .main,.top+main{margin-left:0;width:100%}main{padding-top:60px;padding-bottom:65px}.mapPage{height:calc(100vh - 125px)}
+ .mapTools{top:12px!important;left:10px!important;right:10px!important}.mapTools input{width:calc(100vw - 100px)!important}.mapTools .btn{display:none}
+ .mapLegend{left:10px;bottom:10px}.mapInfo{right:10px;bottom:10px}.mapInfo span{display:none}
+}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sideBrand"><div class="sideLogo">SZ</div><div><b>SafeZone AI</b><small>DISASTER RESCUE</small></div></div>
+  <nav class="sideNav">
+    <button class="active" data-page="home"><span>⌂</span>Home</button>
+    <button data-page="mapPage"><span>⌖</span>Risk Map</button>
+    <button data-page="priority"><span>!</span>Priority</button>
+    <button data-page="relocation"><span>⌂</span>Relocation</button>
+    <button data-page="alerts"><span>♧</span>Alerts</button>
+  </nav>
+  <div class="sideStatus"><b>● AI Monitoring Active</b><small>Last update: 2 min ago</small></div>
+</aside>
+<header class="top">
+  <div class="topTitle" id="topTitle">Dashboard</div>
+  <div class="topRight"><span class="live">● LIVE RISK MONITORING</span><button class="nav emergency" onclick="go('alerts');toast('Emergency console opened')">Emergency Alert</button></div>
+</header>
+<main>
+<section id="home" class="page active">
+<div class="hero"><div><h1>Disaster Risk Intelligence</h1><p>Identify high-risk areas, protect vulnerable communities, and plan safer relocation.</p></div><div class="heroScore"><span>Overall Risk Index</span><b>72/100</b><small>Elevated monitoring</small></div></div>
+<div class="section"><h2>Risk Overview</h2><span class="muted">Live demo data · updated 2 minutes ago</span></div>
+<div class="grid4">
+<div class="card risk" style="--c:var(--red)"><span class="badge critical">CRITICAL</span><b>12</b><span class="muted">Critical zones</span></div>
+<div class="card risk" style="--c:var(--orange)"><span class="badge high">HIGH</span><b>28</b><span class="muted">High-risk zones</span></div>
+<div class="card risk" style="--c:var(--yellow)"><span class="badge moderate">MODERATE</span><b>45</b><span class="muted">Moderate zones</span></div>
+<div class="card risk" style="--c:var(--green)"><span class="badge low">LOW</span><b>67</b><span class="muted">Low-risk zones</span></div>
+</div>
+<div class="grid2" style="margin-top:15px"><div class="card row"><div><b>Population at Immediate Risk</b><div class="muted">People requiring urgent attention</div></div><div class="score red">1,240</div></div><div class="card row"><div><b>Available Safe Relocation Capacity</b><div class="muted">Verified sites</div></div><div class="score green">4,300</div></div></div>
+<div class="section"><h2>Priority Alert</h2><button class="btn light" onclick="go('priority')">View Priority</button></div>
+<div class="card alert row"><div><span class="badge critical">CRITICAL ZONE</span><h3>Immediate relocation recommended</h3><span class="muted">Flood + landslide exposure detected for 1,240 vulnerable residents.</span></div><div style="text-align:right"><div class="score red">92/100</div><small>Priority Score</small></div></div>
+</section>
+
+<section id="mapPage" class="page mapPage">
+<div class="mapHeader">
+  <div><h2>Global Risk Map</h2><p>Worldwide disaster-risk overview with live-style risk overlays</p></div>
+  <div class="mapFilters">
+    <button class="filter active" onclick="setRiskFilter('all',this)">All</button>
+    <button class="filter" onclick="setRiskFilter('critical',this)">🔴 Critical</button>
+    <button class="filter" onclick="setRiskFilter('high',this)">🟠 High</button>
+    <button class="filter" onclick="setRiskFilter('moderate',this)">🟡 Moderate</button>
+    <button class="filter" onclick="setRiskFilter('low',this)">🟢 Low</button>
+  </div>
+</div>
+<div class="worldMapShell">
+  <div class="mapTools">
+    <input id="mapSearch" placeholder="Search country or area..." onkeydown="if(event.key==='Enter') searchMap()">
+    <button class="btn" onclick="resetWorldMap()">🌐 World View</button>
+    <button class="btn light" onclick="locateMe()">◎ Locate</button>
+  </div>
+  <div id="map"></div>
+  <div class="mapLegend">
+    <b>DISASTER RISK LEVEL</b>
+    <div><i style="background:var(--red)"></i>Critical / Immediate action</div>
+    <div><i style="background:var(--orange)"></i>High / Prepare</div>
+    <div><i style="background:var(--yellow)"></i>Moderate / Monitor</div>
+    <div><i style="background:var(--green)"></i>Low / Safe</div>
+    <hr>
+    <small>Click any location to view risk score, hazard and population.</small>
+  </div>
+  <div class="mapInfo">
+    <b>Global Risk Intelligence</b>
+    <span>18 monitored locations</span>
+    <span>5 critical · 5 high · 4 moderate · 4 low</span>
+  </div>
+</div>
+</section>
+
+<section id="priority" class="page">
+<div class="section"><h2>Priority Ranking</h2><span class="muted">Vulnerable habitations ranked by Priority Score</span></div>
+<div class="grid3">
+<div class="card"><div class="rank"><div class="rankNo" style="background:#fde7e5;color:var(--red)">1</div><div class="rankMain"><b>Critical Zone</b><span class="badge critical">92</span></div></div><div class="muted">Population: 1,240 · Vulnerability: Very High</div><div class="bar"><i style="width:92%;background:var(--red)"></i></div><p class="muted">Flood + Landslide · Immediate Relocation</p><button class="btn light" onclick="details('Critical Zone',92,1240,'Flood + Landslide','Immediate Relocation')">View Details</button></div>
+<div class="card"><div class="rank"><div class="rankNo" style="background:#fff0da;color:var(--orange)">2</div><div class="rankMain"><b>High Risk Area</b><span class="badge high">84</span></div></div><div class="muted">Population: 980 · Vulnerability: High</div><div class="bar"><i style="width:84%;background:var(--orange)"></i></div><p class="muted">Heavy Rainfall + Landslide · Immediate Attention</p><button class="btn light" onclick="details('High Risk Area',84,980,'Heavy Rainfall + Landslide','Immediate Attention')">View Details</button></div>
+<div class="card"><div class="rank"><div class="rankNo" style="background:#fff7d5;color:#9b7b00">3</div><div class="rankMain"><b>Mountain Village</b><span class="badge moderate">76</span></div></div><div class="muted">Population: 720 · Vulnerability: High</div><div class="bar"><i style="width:76%;background:var(--yellow)"></i></div><p class="muted">Landslide · Short-Term Relocation</p><button class="btn light" onclick="details('Mountain Village',76,720,'Landslide','Short-Term Relocation')">View Details</button></div>
+</div>
+<div class="section"><h2>Priority Score Breakdown</h2></div><div class="card"><table><tr><th>Factor</th><th>Weight</th><th>Status</th></tr><tr><td>Hazard intensity</td><td>35%</td><td>Very High</td></tr><tr><td>Population exposed</td><td>25%</td><td>1,240 people</td></tr><tr><td>Vulnerability</td><td>20%</td><td>Very High</td></tr><tr><td>Infrastructure</td><td>10%</td><td>Needs attention</td></tr><tr><td>Evacuation accessibility</td><td>10%</td><td>Limited</td></tr></table></div>
+</section>
+
+<section id="relocation" class="page">
+<div class="section"><h2>Safe Relocation Sites</h2><span class="muted">Use the reference-style cards to compare verified safe zones</span></div>
+<div class="grid2">
+<div class="card"><span class="badge low">★ RECOMMENDED SITE</span><h3>Government Higher Secondary School</h3><div class="siteScore"><span class="muted">SafeZone Score</span><br><strong>92 / 100</strong></div><div class="details"><span>Capacity <b>2,500</b></span><span>Available <b>1,980</b></span><span>Distance <b>2.4 km</b></span><span>Healthcare <b>1.2 km</b></span><span>Road <b>Good</b></span><span>Hazard <b>Low</b></span><span>Water <b>Good</b></span><span>Electricity <b>Available</b></span></div><div class="actions"><button class="btn green" onclick="toast('Relocation assigned to Government Higher Secondary School')">Assign Relocation</button><button class="btn light" onclick="toast('Carrying capacity assessment opened')">Assess Capacity</button></div></div>
+<div class="card"><span class="badge high">SAFEZONE VERIFIED</span><h3>Community Relief Centre</h3><div class="siteScore" style="background:#fff5df"><span class="muted">SafeZone Score</span><br><strong style="color:var(--orange)">86 / 100</strong></div><div class="details"><span>Capacity <b>1,800</b></span><span>Available <b>1,320</b></span><span>Distance <b>3.1 km</b></span><span>Healthcare <b>1.8 km</b></span><span>Road <b>Good</b></span><span>Hazard <b>Low</b></span><span>Water <b>Available</b></span><span>Electricity <b>Available</b></span></div><div class="actions"><button class="btn green" onclick="toast('Relocation assigned to Community Relief Centre')">Assign Relocation</button><button class="btn light" onclick="go('mapPage')">View Map</button></div></div>
+</div>
+</section>
+
+<section id="alerts" class="page">
+<div class="section"><h2>Alerts</h2><button class="btn red" onclick="toast('Emergency alert prepared for authorized response teams')">Send Emergency Alert</button></div>
+<div class="alertSummary"><div class="card"><strong style="color:var(--red)">1</strong><span>Critical Alerts</span></div><div class="card"><strong style="color:var(--orange)">2</strong><span>High Alerts</span></div><div class="card"><strong style="color:var(--blue)">1</strong><span>Moderate Alerts</span></div></div>
+<div class="section"><h2>Recent Alerts</h2></div><div class="grid2">
+<div class="card alert"><div class="row"><b>▲ Critical Zone Alert</b><span class="score red">92</span></div><p class="muted">📍 Area: Critical Zone</p><p class="muted">⚠ Hazard: Flood + Landslide</p><p class="muted"><b>Recommended Action:</b> Immediate Relocation</p><p class="muted">Updated: 10 minutes ago</p><button class="btn red" onclick="details('Critical Zone',92,1240,'Flood + Landslide','Immediate Relocation')">VIEW ALERT DETAILS</button></div>
+<div class="card"><div class="row"><b>⚠ High Risk Area</b><span class="score orange">84</span></div><p class="muted">📍 Area: High Risk Area</p><p class="muted">⚠ Hazard: Heavy Rainfall + Landslide</p><p class="muted"><b>Recommended Action:</b> Prepare for Relocation</p><p class="muted">Updated: 35 minutes ago</p><button class="btn light" onclick="toast('Alert details opened')">VIEW ALERT DETAILS</button></div>
+</div>
+</section>
+</main>
+
+<div class="modal" id="modal"><div class="modalBox"><button class="close" onclick="closeModal()">×</button><h2 id="dTitle"></h2><div class="siteScore"><span class="muted">Priority Score</span><br><strong id="dScore" style="color:var(--red)"></strong></div><div class="grid2"><div class="card"><b>Population</b><p id="dPop"></p></div><div class="card"><b>Hazards</b><p id="dHazard"></p></div><div class="card"><b>Relocation Priority</b><p id="dAction"></p></div><div class="card"><b>AI Confidence</b><p>94%</p></div></div><h3>Recommended Action</h3><p>Move vulnerable residents to a safer location and activate emergency response procedures.</p><button class="btn green" onclick="go('relocation');closeModal()">Find Relocation Site</button></div></div>
+<div class="toast" id="toastBox"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const names={home:'Dashboard',mapPage:'Risk Map',priority:'Priority Ranking',relocation:'Relocation Sites',alerts:'Alerts'};
+function go(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.sideNav button[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===id));document.getElementById('topTitle').textContent=({home:'Dashboard',mapPage:'Global Risk Map',priority:'Priority Ranking',relocation:'Relocation Sites',alerts:'Alerts'})[id];window.scrollTo({top:0,behavior:'smooth'});if(id==='mapPage'&&window.map)setTimeout(()=>map.invalidateSize(),150)}
+document.querySelectorAll('.sideNav button[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page));
+function toast(t){let x=document.getElementById('toastBox');x.textContent=t;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),2500)}
+function details(n,s,p,h,a){dTitle.textContent=n;dScore.textContent=s+' / 100';dPop.textContent=p.toLocaleString()+' people';dHazard.textContent=h;dAction.textContent=a;modal.classList.add('show')}
+function closeModal(){modal.classList.remove('show')}
+function searchMap(){let q=document.getElementById('mapSearch').value.trim();if(q)toast('Search requested for '+q+'. Connect a geocoding API for live search.')}
+function locateMe(){toast('Location access can be enabled in your browser for live positioning.')}
+let map;
+let markerLayers=[];
+let currentRisk='all';
+const riskData=[
+ {lat:23,lng:78,n:'India Risk Cluster',s:92,p:12400,h:'Flood + Landslide',a:'Immediate Relocation',r:'critical'},
+ {lat:35,lng:104,n:'East Asia Risk Area',s:88,p:8200,h:'Earthquake',a:'Immediate Attention',r:'critical'},
+ {lat:15,lng:-86,n:'Central America Flood Zone',s:84,p:5300,h:'Flood + Storm',a:'Prepare for Relocation',r:'high'},
+ {lat:30,lng:47,n:'Middle East Heat Risk',s:81,p:4100,h:'Extreme Heat',a:'Emergency Monitoring',r:'high'},
+ {lat:-6,lng:106,n:'Southeast Asia Flood Zone',s:78,p:6900,h:'Flood',a:'Prepare for Relocation',r:'high'},
+ {lat:-23,lng:-46,n:'South America Urban Risk',s:74,p:3800,h:'Heavy Rainfall',a:'Monitor Closely',r:'moderate'},
+ {lat:51,lng:0,n:'Western Europe',s:56,p:2100,h:'Storm',a:'Monitor',r:'moderate'},
+ {lat:64,lng:25,n:'Northern Europe Safe Area',s:31,p:700,h:'Low Exposure',a:'Safe Zone',r:'low'},
+ {lat:40,lng:-100,n:'North America',s:48,p:1600,h:'Wildfire',a:'Monitor',r:'moderate'},
+ {lat:-33,lng:151,n:'Australia East',s:39,p:900,h:'Storm',a:'Monitor',r:'low'},
+ {lat:-1,lng:37,n:'East Africa',s:72,p:2900,h:'Drought + Flood',a:'Prepare',r:'high'},
+ {lat:19,lng:-99,n:'Mexico Central',s:67,p:2300,h:'Earthquake',a:'Monitor',r:'moderate'},
+ {lat:28,lng:77,n:'Delhi Region',s:86,p:7600,h:'Flood + Heat',a:'Immediate Attention',r:'critical'},
+ {lat:10,lng:76,n:'South India',s:63,p:1900,h:'Heavy Rainfall',a:'Monitor',r:'moderate'},
+ {lat:1,lng:103,n:'Singapore Safe Zone',s:24,p:500,h:'Low Exposure',a:'Safe Zone',r:'low'},
+ {lat:55,lng:37,n:'Eastern Europe',s:43,p:1200,h:'Storm',a:'Monitor',r:'low'},
+ {lat:-34,lng:18,n:'Southern Africa',s:37,p:800,h:'Low Exposure',a:'Safe Zone',r:'low'},
+ {lat:35,lng:139,n:'Japan Risk Area',s:82,p:4400,h:'Earthquake + Tsunami',a:'Immediate Attention',r:'high'}
+];
+const colors={critical:'#d33b35',high:'#e48b00',moderate:'#cba300',low:'#299447'};
+function initMap(){
+ map=L.map('map',{worldCopyJump:true,minZoom:2,maxZoom:12}).setView([20,10],2);
+ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
+ drawRiskMarkers();
+}
+function drawRiskMarkers(){
+ markerLayers.forEach(x=>map.removeLayer(x)); markerLayers=[];
+ riskData.filter(x=>currentRisk==='all'||x.r===currentRisk).forEach(x=>{
+   const icon=L.divIcon({className:'',html:`<div style="width:26px;height:26px;border-radius:50%;background:${colors[x.r]};border:3px solid white;box-shadow:0 2px 9px #0006;display:grid;place-items:center;color:white;font-size:10px;font-weight:900">${x.s}</div>`,iconSize:[26,26],iconAnchor:[13,13]});
+   const marker=L.marker([x.lat,x.lng],{icon}).addTo(map);
+   marker.bindPopup(`<div style="font-family:Arial"><b style="font-size:15px">${x.n}</b><br><span style="font-size:24px;font-weight:800;color:${colors[x.r]}">${x.s}/100</span><br><small>Population: ${x.p.toLocaleString()}<br>Hazard: ${x.h}<br><b>Action: ${x.a}</b></small><br><button class="btn popupBtn" onclick="details('${x.n}',${x.s},${x.p},'${x.h}','${x.a}')">View Risk Details</button></div>`);
+   markerLayers.push(marker);
+   if(x.r==='critical'||x.r==='high'){
+     const circle=L.circle([x.lat,x.lng],{radius:x.r==='critical'?180000:130000,color:colors[x.r],fillColor:colors[x.r],fillOpacity:.10,weight:2}).addTo(map);
+     circle.bindTooltip(x.n+' — '+x.s+'/100'); markerLayers.push(circle);
+   }
+ });
+}
+function setRiskFilter(r,el){currentRisk=r;document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));el.classList.add('active');drawRiskMarkers();toast(r==='all'?'Showing all global risk levels':'Showing '+r+' risk locations')}
+function resetWorldMap(){currentRisk='all';document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));document.querySelector('.filter').classList.add('active');map.setView([20,10],2);drawRiskMarkers()}
+function searchMap(){const q=document.getElementById('mapSearch').value.trim().toLowerCase();if(!q){resetWorldMap();return}const x=riskData.find(d=>d.n.toLowerCase().includes(q));if(x){map.setView([x.lat,x.lng],5);setTimeout(()=>{const m=markerLayers.find(m=>m.getLatLng&&Math.abs(m.getLatLng().lat-x.lat)<.01);if(m)m.openPopup()},300)}else toast('No demo risk location found for “'+q+'”')}
+function locateMe(){if(navigator.geolocation){navigator.geolocation.getCurrentPosition(p=>{map.setView([p.coords.latitude,p.coords.longitude],5);toast('Map centered on your location')},()=>toast('Location permission was not granted'))}else toast('Geolocation is not supported')}
+window.addEventListener('load',initMap);</script>
+
+<script>
+/* SafeZone AI Flask API integration.
+   Demo data is clearly labelled; this app is not an official emergency service. */
+(async function connectSafeZoneBackend() {
+  async function api(path, options = {}) {
+    const response = await fetch(path, {
+      headers: {"Content-Type": "application/json"},
+      ...options
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "API request failed");
+    return data;
+  }
+
+  function safeToast(message) {
+    if (typeof toast === "function") toast(message);
+    else window.alert(message);
+  }
+
+  try {
+    const dashboard = await api("/api/dashboard");
+    const heroScore = document.querySelector(".heroScore b");
+    if (heroScore) heroScore.textContent = `${dashboard.overall_risk}/100`;
+    const counters = document.querySelectorAll(".grid4 .card.risk b");
+    ["critical", "high", "moderate", "low"].forEach((level, index) => {
+      if (counters[index] && dashboard.zone_counts[level] !== undefined) {
+        counters[index].textContent = dashboard.zone_counts[level];
+      }
+    });
+
+    const riskResponse = await api("/api/risks");
+    if (Array.isArray(riskResponse.items) && riskResponse.items.length) {
+      riskData.splice(0, riskData.length, ...riskResponse.items.map(item => ({
+        lat: item.lat, lng: item.lng, n: item.name, s: item.score,
+        p: item.population, h: item.hazard, a: item.recommended_action,
+        r: item.level, id: item.id
+      })));
+      if (typeof drawRiskMarkers === "function" && window.map) drawRiskMarkers();
+    }
+
+    // Make the relocation assignment buttons write to the backend.
+    document.querySelectorAll("#relocation .actions .btn.green").forEach((button, index) => {
+      button.onclick = async () => {
+        const sites = await api("/api/relocation-sites");
+        const site = sites.items[index];
+        if (!site) return safeToast("No relocation site found.");
+        try {
+          const result = await api("/api/relocation-assignments", {
+            method: "POST",
+            body: JSON.stringify({site_id: site.id, people: 1})
+          });
+          safeToast(result.message);
+        } catch (error) {
+          safeToast(error.message);
+        }
+      };
+    });
+
+    // Emergency alert buttons create an alert record in SQLite.
+    document.querySelectorAll("#alerts .btn.red").forEach(button => {
+      button.addEventListener("click", async () => {
+        try {
+          const result = await api("/api/alerts", {
+            method: "POST",
+            body: JSON.stringify({
+              title: "Emergency response alert",
+              level: "high",
+              message: "Demo alert created from the SafeZone AI dashboard."
+            })
+          });
+          safeToast(result.message);
+        } catch (error) {
+          safeToast(error.message);
+        }
+      });
+    });
+  } catch (error) {
+    console.warn("SafeZone backend connection:", error.message);
+    safeToast("Backend data could not be loaded. Check that Flask is running.");
+  }
+})();
+</script>
+
+</body>
+</html>
