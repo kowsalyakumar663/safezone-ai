@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Generated at first run
+safezone.db
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
